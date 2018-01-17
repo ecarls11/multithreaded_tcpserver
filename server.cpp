@@ -104,6 +104,11 @@ void server_c::stop()
 	//clear out running flag
 	m_running = false;
 
+	//close the listener thread
+	shutdown(m_sockfd, SHUT_RDWR);
+	close(m_sockfd);
+	m_listener_thread.join();
+
 	//cleanup our tmp thread pointer if the listener
 	//thread was terminated before the new thread made
 	//it into the socket map
@@ -130,12 +135,6 @@ void server_c::stop()
 	}
 
 	m_thread_map.clear();
-
-	//close the listener socket (breaks accept blocking)
-	//and wait for the thread to complete
-	shutdown(m_sockfd, SHUT_RDWR);
-	close(m_sockfd);
-	m_listener_thread.join();
 }
 
 bool server_c::is_running()
